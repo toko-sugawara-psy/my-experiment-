@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ミュラー・リヤー錯視 調整法実験 -視覚の試練-</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/jspsych@7.3.0/css/jspsych.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/jspsych@7.3.0/dist/index.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@jspsych/plugin-canvas-slider-response@1.1.2/dist/index.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@jspsych/plugin-html-button-response@1.1.2/dist/index.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@jspsych/plugin-survey-text@1.1.2/dist/index.browser.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      background-color: #0f0d0b;
+      background-image: 
+        radial-gradient(circle at 50% 30%, #3d352d 0%, #0f0d0b 70%),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 0 L100 87 L0 87 Z" fill="%23b8a25c" fill-opacity="0.05"/></svg>');
+      background-attachment: fixed;
+      font-family: 'serif', '游明朝', 'Yu Mincho', serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      color: #d1c7ac;
+    }
+    
+    .jspsych-content {
+      background: linear-gradient(180deg, rgba(40, 35, 30, 0.95) 0%, rgba(20, 18, 15, 0.95) 100%);
+      border: 6px double #b8a25c;
+      border-radius: 4px;
+      padding: 4rem;
+      max-width: 600px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 0 80px rgba(0,0,0,0.9), inset 0 0 30px rgba(184, 162, 92, 0.2);
+    }
+
+    h1 { color: #d4af37 !important; text-shadow: 2px 2px 8px #000; letter-spacing: 0.2em; margin-bottom: 2rem; border-bottom: 2px solid #b8a25c; padding-bottom: 1rem; }
+    p { font-size: 1.3rem; margin-bottom: 1.5rem; color: #e6dfc6; line-height: 1.7; text-shadow: 1px 1px 2px #000; }
+
+    canvas {
+      background-color: #e6dcc6;
+      border: 8px double #8b6e2f;
+      margin: 2rem auto;
+      display: block;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 20px rgba(139, 110, 47, 0.3);
+    }
+
+    .slider-container { width: 100%; max-width: 400px; margin: 1rem auto; }
+
+    input[type=range] {
+      width: 100%; height: 8px; background: #2a2520; border-radius: 4px;
+      appearance: none; cursor: pointer; border: 1px solid #b8a25c;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none; width: 32px; height: 32px; border-radius: 50%;
+      background: #b8a25c; border: 4px solid #fcf3c0; box-shadow: 0 0 15px #b8a25c;
+    }
+
+    button {
+      background: #3d352d !important; color: #d1c7ac !important; border: 2px solid #b8a25c !important;
+      padding: 0.8rem 3rem !important; font-size: 1.2rem !important; font-weight: bold !important; 
+      transition: all 0.4s !important; text-transform: uppercase; letter-spacing: 3px;
+      box-shadow: 0 6px 0 #1a1714;
+    }
+    button:hover { background: #b8a25c !important; color: #1a1714 !important; transform: translateY(-3px); box-shadow: 0 8px 0 #1a1714; }
+  </style>
+</head>
+<body>
+  <div id="jspsych-target"></div>
+
+  <script>
+    window.addEventListener('load', function() {
+      const jsPsych = initJsPsych({
+        display_element: 'jspsych-target',
+        on_finish: sendDataToGAS
+      });
+
+      const angles = [15, 75]; 
+      const lengths = [20, 50]; 
+      const repetitions = 3; 
+      const totalTrials = angles.length * lengths.length * repetitions;
+
+      let trialsConfig = [];
+      for (let a of angles) {
+        for (let l of lengths) {
+          for (let r = 0; r < repetitions; r++) {
+            trialsConfig.push({ angle: a, shaft_length_wing: l });
+          }
+        }
+      }
+      trialsConfig = jsPsych.randomization.shuffle(trialsConfig);
+
+      const timeline = [];
+
+      timeline.push({
+        type: jsPsychSurveyText,
+        questions: [{ prompt: "冒険者の名前を刻め", required: true, name: 'subject_id' }],
+        button_label: '確認',
+        on_finish: (data) => jsPsych.data.addProperties({ subject_id: data.response.subject_id })
+      });
+
+      timeline.push({
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1 class="text-3xl font-bold">視覚の試練</h1>
+                   <p>古の賢者より言い伝えられし視覚の試練。<br>画面に現れる二つの矢印を見比べ、下の矢印の長さを調整せよ。</p>`,
+        choices: ['試練へ挑む']
+      });
+
+      trialsConfig.forEach((config, index) => {
+        timeline.push({
+          type: jsPsychCanvasSliderResponse,
+          stimulus: (c) => drawMullerLyer(c, 250, config.angle, config.shaft_length_wing),
+          canvas_size: [350, 500],
+          min: 50,
+          max: 450,
+          slider_start: 250,
+          button_label: '決定',
+          prompt: `<div class="slider-container">
+                     <div class="text-[#b8a25c] font-bold text-lg mb-4 tracking-widest">第 ${index + 1} の試練 / 全 ${totalTrials}</div>
+                   </div>`,
+          on_load: function() {
+            const slider = document.querySelector('input[type="range"]');
+            slider.addEventListener('input', (e) => drawMullerLyer(document.getElementById('jspsych-canvas-stimulus'), e.target.value, config.angle, config.shaft_length_wing));
+          },
+          on_finish: (data) => { 
+            data.timestamp = new Date().toISOString();
+            data.pse = data.response;
+            data.error_amount = data.response - 200;
+          }
+        });
+      });
+
+      function drawMullerLyer(canvas, val, angle, wLen) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const mid = canvas.width / 2, rad = angle * Math.PI / 180;
+        ctx.strokeStyle = '#2a2520'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+        // 標準(200px)
+        ctx.beginPath(); ctx.moveTo(mid-100, 100); ctx.lineTo(mid+100, 100); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(mid-100+wLen*Math.cos(rad), 100-wLen*Math.sin(rad)); ctx.lineTo(mid-100, 100); ctx.lineTo(mid-100+wLen*Math.cos(rad), 100+wLen*Math.sin(rad)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(mid+100-wLen*Math.cos(rad), 100-wLen*Math.sin(rad)); ctx.lineTo(mid+100, 100); ctx.lineTo(mid+100-wLen*Math.cos(rad), 100+wLen*Math.sin(rad)); ctx.stroke();
+        // 比較(val)
+        ctx.beginPath(); ctx.moveTo(mid-val/2, 250); ctx.lineTo(mid+val/2, 250); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(mid-val/2-wLen*Math.cos(rad), 250-wLen*Math.sin(rad)); ctx.lineTo(mid-val/2, 250); ctx.lineTo(mid-val/2-wLen*Math.cos(rad), 250+wLen*Math.sin(rad)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(mid+val/2+wLen*Math.cos(rad), 250-wLen*Math.sin(rad)); ctx.lineTo(mid+val/2, 250); ctx.lineTo(mid+val/2+wLen*Math.cos(rad), 250+wLen*Math.sin(rad)); ctx.stroke();
+      }
+
+      async function sendDataToGAS() {
+        const display = document.getElementById('jspsych-target');
+        display.innerHTML = `<h2 class="text-2xl text-[#b8a25c]">旅の記録を石板に刻んでいます...</h2>`;
+        
+        const data = jsPsych.data.get().filter({trial_type: 'canvas-slider-response'}).values().map(t => ({
+          subject_id: t.subject_id, timestamp: t.timestamp, angle: t.angle, wing_length: t.shaft_length_wing, pse: t.pse, error_amount: t.error_amount
+        }));
+
+        try {
+          const response = await fetch('https://script.google.com/macros/s/AKfycbxTc4zs9_tzptsraf3ZfQuFZjvXQ-7kLTVC1grAaQvVIDKiCD0l7xpwqI-YzHr9onx6LQ/exec', {
+            method: 'POST', mode: 'no-cors', body: JSON.stringify(data)
+          });
+          display.innerHTML = `<h2 class="text-3xl font-bold text-[#b8a25c] mb-4">試練完遂</h2><p>冒険者の魂に祝福あれ。旅路に幸多からんことを。</p>`;
+        } catch(e) {
+          display.innerHTML = `<h2 class="text-2xl font-bold text-red-500 mb-4">記録失敗</h2><p>試練の記録が石板に刻めなかった。</p>`;
+        }
+      }
+
+      jsPsych.run(timeline);
+    });
+  </script>
+</body>
+</html>
