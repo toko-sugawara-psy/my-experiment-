@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>尚絅学院大学 陶子の心理学実験室</title>
+    <style>
+        :root {
+            --primary-color: #ffb7c5; /* 可愛らしいパステルピンク */
+            --accent-color: #ff9aa2; 
+            --text-color: #666;
+            /* 背景用のチェック柄設定 */
+            --bg-color: #fff0f3;
+            --grid-color: #ffdee5;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            /* 淡いピンクのチェック柄背景 */
+            background-color: var(--bg-color);
+            background-image: linear-gradient(0deg, var(--grid-color) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            padding: 3rem 1rem;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            color: var(--accent-color);
+        }
+
+        main {
+            max-width: 800px;
+            width: 90%;
+            padding: 2rem 0;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 3rem;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 1.5rem;
+            border-radius: 20px;
+        }
+
+        .experiment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 10px 15px -3px rgba(255, 183, 197, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid white;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 183, 197, 0.5);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-size: 1.25rem;
+        }
+
+        .card p {
+            flex-grow: 1;
+            font-size: 0.95rem;
+        }
+
+        .card a {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px; /* ボタンも丸くして可愛らしく */
+            text-align: center;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .card a:hover {
+            background-color: var(--accent-color);
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding: 2rem;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>尚絅学院大学 陶子の心理学実験室 (≡^.^≡)♪</h1>
+    </header>
+
+    <main>
+        <section class="intro">
+            <p>ご訪問ありがとうございます♪ 以下の実験へのご協力をお願いいたします♪<br>各実験は数分で終わります♪ スマートフォンからも参加可能です♪</p>
+        </section>
+
+        <section class="experiment-grid">
+            <!-- 実験0 -->
+            <div class="card">
+                <h2>実験0：はじめてのWebページ</h2>
+                <p>第2回で作成した記念すべき「Hello World」のページです♪</p>
+                <a href="hello_world.html">Hello Worldを見る</a>
+            </div>
+
+            <!-- 実験1 -->
+            <div class="card">
+                <h2>実験1：ストループ課題</h2>
+                <p>「文字の意味」と「文字の色」の干渉を調べる、簡単なキーボード入力のテストです。（所要時間：約3分）♪</p>
+                <a href="stroop.html">実験1に参加する</a>
+            </div>
+
+            <!-- 実験2 -->
+            <div class="card">
+                <h2>実験2：ミュラー・リヤー錯視</h2>
+                <p>図形の長さが違って見える錯覚を測る、スライダーを使った視覚のテストです。（所要時間：約2分）♪</p>
+                <a href="muller_lyer_final.html">実験2に参加する</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 Shokei Gakuin University Psychology Lab.
+    </footer>
+
+</body>
+</html>
