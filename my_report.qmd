@@ -1,0 +1,156 @@
+---
+title: "StroopReport"
+author: "Toko SUGAWARA(2412B15)"
+format:
+  html:
+    embed-resources: true
+editor: visual
+bibliography: references.bib
+---
+
+## 1. 目的 (Introduction)
+
+本研究では、ストループ効果について検討する。ストループ効果とは…（[@stroop1935a]）。 本実験の仮説は「不一致条件は一致条件よりも反応時間が長くなる」とした。
+
+## 2. 方法 (Method)
+
+### 参加者
+
+10名のデータを収集した。
+
+### 装置と材料
+
+オンライン実験プラットフォーム（jsPsych）を使用し…
+
+### 手続き
+
+実験で参加者は…
+
+## 3. 結果 (Results)
+
+以下の通り、対応のあるt検定を行った。 library(tidyverse)
+
+# 1. データの読み込み（既にdfが存在する場合は省略可能）
+
+# df \<- read_csv("dummy_t_test.csv")
+
+# 2. グラフ描画用のデータ集計（平均値と標準誤差の算出）
+
+graph_data \<- df %\>% group_by(condition) %\>% summarise( mean_rt = mean(rt, na.rm = TRUE), sd_rt = sd(rt, na.rm = TRUE), n = n(), se_rt = sd_rt / sqrt(n) \# 標準誤差 (Standard Error) の計算 )
+
+# 3. ggplot2を用いたエラーバー付き棒グラフの作成
+
+p \<- ggplot(graph_data, aes(x = condition, y = mean_rt, fill = condition)) + geom_bar(stat = "identity", width = 0.5, color = "black", alpha = 0.8) + geom_errorbar(aes(ymin = mean_rt - se_rt, ymax = mean_rt + se_rt), width = 0.15, color = "black") + labs( title = "Reaction Time Across N-Back Conditions", x = "Condition", y = "Mean Reaction Time (ms)" ) + theme_minimal() + theme( plot.title = element_text(hjust = 0.5, face = "bold"), legend.position = "none" )
+
+# 4. グラフを画像として保存
+
+ggsave("dummy_t_graph.png", plot = p, width = 6, height = 4, dpi = 300)
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# 必要なパッケージの読み込み（未インストールの場合はコメントアウトを外して実行してください）
+# install.packages("tidyverse")
+library(tidyverse)
+
+# 1. CSVファイルの読み込み
+# `clean_dummy_data.csv` を読み込みます
+data <- read_csv("clean_dummy_data.csv")
+
+# 2. 参加者（subject_id）ごとに各条件（condition）の反応時間（rt）の平均値を算出
+participant_means <- data %>%
+  group_by(subject_id, condition) %>%
+  summarize(mean_rt = mean(rt, na.rm = TRUE), .groups = "drop")
+
+# 3. その「参加者ごとの平均値」を使って、全参加者における条件ごとの「全体の平均値」と「標準誤差（SE）」を算出
+summary_data <- participant_means %>%
+  group_by(condition) %>%
+  summarize(
+    overall_mean = mean(mean_rt, na.rm = TRUE),
+    sd_val = sd(mean_rt, na.rm = TRUE),
+    n_count = n(),
+    se = sd_val / sqrt(n_count),
+    .groups = "drop"
+  )
+
+# 4. 集計結果の表をコンソールに表示
+print("=== 条件ごとの集計結果（平均値と標準誤差） ===")
+print(summary_data)
+
+# 【グラフ作成の条件】
+# ggplot2を使用して、条件ごとの平均値をエラーバー付きの棒グラフで描画
+p <- ggplot(summary_data, aes(x = condition, y = overall_mean, fill = condition)) +
+  # 棒グラフの描画（幅を調整し、枠線を黒に設定）
+  geom_bar(stat = "identity", width = 0.5, color = "black", alpha = 0.8) +
+  # エラーバーの追加（平均値 ± 標準誤差）
+  geom_errorbar(aes(ymin = overall_mean - se, ymax = overall_mean + se), width = 0.2) +
+  # グラフのタイトルと軸ラベルの設定
+  labs(
+    title = "ダミーデータ：条件ごとの平均反応時間",
+    x = "条件",
+    y = "反応時間 (ms)"
+  ) +
+  # 論文向けにシンプルなテーマ（theme_classic）を適用
+  theme_classic(base_size = 14) +
+  # 凡例を非表示にし、軸やタイトルの見た目を整える
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_text(face = "bold")
+  ) +
+  # Y軸の範囲を0からスタートさせ、上部に余白を持たせる
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+
+# 描画したグラフの表示
+print(p)
+
+# 作成したグラフを `dummy_graph.png` という名前で保存
+ggsave(
+  filename = "dummy_graph.png",
+  plot = p,
+  width = 6,
+  height = 5,
+  dpi = 300
+)
+library(tidyverse)
+
+# 1. データの読み込み
+df <- read_csv("dummy_t_test.csv")
+
+# 2. 記述統計量（各条件の平均値、標準偏差など）の算出と表示
+cat("=== 記述統計量 ===\n")
+desc_stats <- df %>%
+  group_by(condition) %>%
+  summarise(
+    n = n(),
+    mean_rt = mean(rt, na.rm = TRUE),
+    sd_rt = sd(rt, na.rm = TRUE),
+    median_rt = median(rt, na.rm = TRUE)
+  )
+print(desc_stats)
+
+cat("\n=== 対応のあるt検定の結果 ===\n")
+
+# 3. 条件ごとにデータを抽出する（チルダを使用せず、別々のベクトルに格納）
+rt_congruent <- df %>%
+  filter(condition == "congruent") %>%
+  pull(rt)
+
+rt_incongruent <- df %>%
+  filter(condition == "incongruent") %>%
+  pull(rt)
+
+# 4. 対応のあるt検定の実行（paired = TRUE）
+result <- t.test(rt_congruent, rt_incongruent, paired = TRUE)
+
+# 5. 検定結果をコンソールに出力
+print(result)
+```
+
+## 4. 考察 (Discussion)
+
+分析の結果、仮説は（支持された / 支持されなかった）。 この理由は……。また、本実験の限界として……が挙げられる。
+
+## 5. 引用文献 (References)
